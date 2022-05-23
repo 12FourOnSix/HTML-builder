@@ -41,10 +41,10 @@ async function copyAssets() {
 
 async function bundleStyles() {
   try {
-    const stylesDirPath = path.join(__dirname, 'styles');
+    const stylesDirPath = join(__dirname, 'styles');
     const filesNamesList = await fsp.readdir(stylesDirPath);
-    const filesPathsList = filesNamesList.map(fileName => path.join(stylesDirPath, fileName));
-    const bundlePath = path.join(__dirname, 'style.css');
+    const filesPathsList = filesNamesList.map(fileName => join(stylesDirPath, fileName));
+    const bundlePath = join(__dirname, 'style.css');
     
     let sccFilesContentArr = [];
 
@@ -58,7 +58,7 @@ async function bundleStyles() {
       sccFilesContentArr.push(styles);
     }
 
-    await fsp.writeFile(bundlePath, sccFilesContentArr.join('\n'));
+    await fsp.writeFile(bundlePath, sccFilesContentArr.join(''));
     
   } catch (err) {
     console.error('Операция не может быть выполнена: ', err.message);
@@ -66,7 +66,7 @@ async function bundleStyles() {
 }
 
 function init() {
-  //copyAssets();
+  copyAssets();
   bundleStyles();
 }
 
