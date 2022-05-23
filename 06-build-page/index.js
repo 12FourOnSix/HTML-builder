@@ -1,5 +1,5 @@
 const fsp = require('fs/promises');
-const { join } = require('path');
+const { join, parse } = require('path');
 
 const projectDir = join(__dirname, 'project-dist');
 
@@ -39,8 +39,35 @@ async function copyAssets() {
   }
 }
 
+async function bundleStyles() {
+  try {
+    const stylesDirPath = path.join(__dirname, 'styles');
+    const filesNamesList = await fsp.readdir(stylesDirPath);
+    const filesPathsList = filesNamesList.map(fileName => path.join(stylesDirPath, fileName));
+    const bundlePath = path.join(__dirname, 'style.css');
+    
+    let sccFilesContentArr = [];
+
+    for (const filePath of filesPathsList) {
+      const fileStat = await fsp.stat(filePath);
+      const isCssFile = fileStat.isFile() && parse(filePath).ext === '.css';
+
+      if (!isCssFile) continue;
+
+      const styles = await fsp.readFile(filePath, { encoding: 'utf-8'});
+      sccFilesContentArr.push(styles);
+    }
+
+    await fsp.writeFile(bundlePath, sccFilesContentArr.join('\n'));
+    
+  } catch (err) {
+    console.error('Операция не может быть выполнена: ', err.message);
+  }
+}
+
 function init() {
-  copyAssets();
+  //copyAssets();
+  bundleStyles();
 }
 
 init();
