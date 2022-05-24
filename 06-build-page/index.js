@@ -44,7 +44,7 @@ async function bundleStyles() {
     const stylesDirPath = join(__dirname, 'styles');
     const filesNamesList = await fsp.readdir(stylesDirPath);
     const filesPathsList = filesNamesList.map(fileName => join(stylesDirPath, fileName));
-    const bundlePath = join(__dirname, 'style.css');
+    const bundlePath = join(projectDir, 'style.css');
     
     let sccFilesContentArr = [];
 
@@ -65,9 +65,39 @@ async function bundleStyles() {
   }
 }
 
+async function replaceTemplatesWithHTMLComponents() {
+  try {
+    const tempatelFilePath = join(__dirname, 'template.html');
+    let htmlString = await fsp.readFile(tempatelFilePath, { encoding: 'utf-8'});
+   
+    const componentsDirPath = join(__dirname, 'components');
+    const compNamesList = await fsp.readdir(componentsDirPath);
+    const compPathsList = compNamesList.map(fileName => join(componentsDirPath, fileName));
+
+    for (const compFile of compPathsList) {
+      const fileStat = await fsp.stat(compFile);
+      const isHTMLFile = fileStat.isFile() && parse(compFile).ext === '.html';
+
+      if (!isHTMLFile) continue;
+
+      const componentName = parse(compFile).name;
+      const componentContent = await fsp.readFile(compFile, { encoding: 'utf-8'});
+
+      htmlString = htmlString.replace(`{{${componentName}}}`, componentContent);
+    }
+
+    const destinationPath = join(projectDir, 'index.html');
+    await fsp.writeFile(destinationPath, htmlString);
+    
+  } catch (err) {
+    console.error('Операция не может быть выполнена: ', err.message);
+  }
+}
+
 function init() {
   copyAssets();
   bundleStyles();
+  replaceTemplatesWithHTMLComponents();
 }
 
 init();
